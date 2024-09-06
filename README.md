@@ -13,7 +13,7 @@ The project is published on Maven Central. To use LZ4 in your Android project, a
 
 Gradle:
 ```kts
-implementation("io.maryk.lz4:lz4-android:1.9.4")
+implementation("io.maryk.lz4:lz4-android:1.10.0")
 ```
 
 ## Documentation

@@ -1,7 +1,9 @@
 @file:Suppress("UnstableApiUsage")
 
+import com.android.build.gradle.tasks.BundleAar
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import java.util.*
 
 plugins {
@@ -10,7 +12,7 @@ plugins {
     id("signing")
 }
 
-val lz4Version = "1.9.4"
+val lz4Version = "1.10.0"
 
 group = "io.maryk.lz4"
 version = lz4Version
@@ -18,11 +20,10 @@ version = lz4Version
 val lz4Home = projectDir.resolve("lz4/lz4-$lz4Version")
 
 android {
-    compileSdk = 33
-    buildToolsVersion = "33.0.0"
+    namespace = "lz4"
+    compileSdk = 35
     defaultConfig {
         minSdk = 21
-        targetSdk = 33
         externalNativeBuild {
             cmake {
                 targets.add("liblz4")
@@ -39,7 +40,7 @@ android {
     externalNativeBuild {
         cmake {
             path = File("$projectDir/CMakeLists.txt")
-            version = "3.18.1"
+            version = "3.19.1"
         }
     }
 }
@@ -101,16 +102,16 @@ if (secretPropsFile.exists()) {
 fun getExtraString(name: String) = ext[name]?.toString()
 
 afterEvaluate {
-    val publishTasks = mutableListOf<Jar>()
+    val publishTasks = mutableListOf<BundleAar>()
 
     android.libraryVariants.all { variant ->
         val name = variant.buildType.name
         if (name != com.android.builder.core.BuilderConstants.DEBUG) {
-            val task = project.tasks.create<Jar>("jar${name.capitalize()}") {
+            val task = project.tasks.getByName<BundleAar>("bundle${name.uppercaseFirstChar()}Aar") {
                 dependsOn(variant.javaCompileProvider)
                 dependsOn(variant.externalNativeBuildProviders)
                 from(variant.javaCompileProvider.get().destinationDirectory)
-                from("${buildDir.absolutePath}/intermediates/library_and_local_jars_jni/$name/jni") {
+                from("${layout.buildDirectory.asFile.get().absolutePath}/intermediates/library_and_local_jars_jni/$name/jni") {
                     include("**/*.so")
                     into("lib")
                 }
@@ -138,8 +139,9 @@ afterEvaluate {
                 artifact(sourcesJar)
                 artifact(javadocJar)
                 publishTasks.forEach(::artifact)
-                groupId = groupId
+                groupId = project.group as String
                 artifactId = "lz4-android"
+                version = project.version as String
 
                 //The publication doesn't know about our dependencies, so we have to manually add them to the pom
                 pom.withXml {

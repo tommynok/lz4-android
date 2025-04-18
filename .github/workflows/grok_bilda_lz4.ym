@@ -1,4 +1,4 @@
-name: Build LZ4 for Android
+name: Build LZ4 for Android (Optimized)
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
         run: |
           export PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           cd lz4
-          make CC=aarch64-linux-android34-clang CFLAGS="-static -O3 -march=armv8-a -mtune=cortex-a53 -flto" LDFLAGS="-static -flto" -j$(nproc)
+          make CC=aarch64-linux-android34-clang CFLAGS="-static -O3 -march=armv8.2-a+dotprod+fp16 -mtune=cortex-a76 -flto -ffast-math -fomit-frame-pointer -DBLOCKSIZE=131072" LDFLAGS="-static -flto" -j$(nproc)
           $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip programs/lz4
       - name: Upload LZ4 binary
         uses: actions/upload-artifact@v4

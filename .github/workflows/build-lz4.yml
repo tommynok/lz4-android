@@ -20,7 +20,7 @@ jobs:
           export PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           cd lz4
           make CC=aarch64-linux-android34-clang CFLAGS="-static -O3" LDFLAGS="-static" -j$(nproc)
-          aarch64-linux-android-strip programs/lz4
+          $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip programs/lz4
       - name: Upload LZ4 binary
         uses: actions/upload-artifact@v4
         with:

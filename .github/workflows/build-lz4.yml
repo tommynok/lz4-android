@@ -12,10 +12,8 @@ jobs:
           distribution: 'temurin'
       - name: Install CMake
         run: |
-          wget https://github.com/Kitware/CMake/releases/download/v3.19.1/cmake-3.19.1-Linux-x86_64.sh
-          chmod +x cmake-3.19.1-Linux-x86_64.sh
-          ./cmake-3.19.1-Linux-x86_64.sh --skip-license --prefix=/usr/local
-          echo "CMAKE_HOME=/usr/local" >> $GITHUB_ENV
+          sudo apt-get update
+          sudo apt-get install -y cmake=3.19.1*
       - name: Install Android NDK
         run: |
           wget https://dl.google.com/android/repository/android-ndk-r26d-linux.zip

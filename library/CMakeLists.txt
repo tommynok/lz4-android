@@ -2,11 +2,11 @@ PROJECT(LZ4 C)
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "LZ4 compression library")
 include(CPack)
 
-cmake_minimum_required (VERSION 2.6)
-INCLUDE (CheckTypeSize)
+cmake_minimum_required(VERSION 2.6)
+INCLUDE(CheckTypeSize)
 check_type_size("void *" SIZEOF_VOID_P)
 IF(${SIZEOF_VOID_P} STREQUAL "8")
-    set (CMAKE_SYSTEM_PROCESSOR "64bit")
+    set(CMAKE_SYSTEM_PROCESSOR "64bit")
     MESSAGE(STATUS "64 bit architecture detected, size of void * is " ${SIZEOF_VOID_P})
 ENDIF()
 
@@ -22,11 +22,15 @@ endif()
 
 set(LZ4_SRCS_LIB ${LZ4_PATH}lz4.c ${LZ4_PATH}lz4hc.c ${LZ4_PATH}lz4.h ${LZ4_PATH}lz4hc.h ${LZ4_PATH}lz4frame.c ${LZ4_PATH}lz4frame.h ${LZ4_PATH}xxhash.c)
 
-add_library(liblz4 SHARED ${LZ4_SRCS_LIB})
+add_library(liblz4 STATIC ${LZ4_SRCS_LIB})
 
 set_target_properties(liblz4 PROPERTIES
         OUTPUT_NAME lz4
         SOVERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}"
-        )
+)
 
-INCLUDE_DIRECTORIES (${LZ4_PATH})
+INCLUDE_DIRECTORIES(${LZ4_PATH})
+
+# Add executable target for lz4 binary
+add_executable(lz4 ${LZ4_PATH}lz4cli.c)
+target_link_libraries(lz4 liblz4)

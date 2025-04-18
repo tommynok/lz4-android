@@ -10,6 +10,12 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Install CMake
+        run: |
+          wget https://github.com/Kitware/CMake/releases/download/v3.19.1/cmake-3.19.1-Linux-x86_64.sh
+          chmod +x cmake-3.19.1-Linux-x86_64.sh
+          ./cmake-3.19.1-Linux-x86_64.sh --skip-license --prefix=/usr/local
+          echo "CMAKE_HOME=/usr/local" >> $GITHUB_ENV
       - name: Install Android NDK
         run: |
           wget https://dl.google.com/android/repository/android-ndk-r26d-linux.zip
@@ -22,4 +28,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lz4-binary
-          path: app/build/outputs/native/*/lz4
+          path: library/build/outputs/native/*/lz4

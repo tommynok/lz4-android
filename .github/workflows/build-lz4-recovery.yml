@@ -1,0 +1,28 @@
+name: Build LZ4 Recovery Binary
+on: [workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Android NDK
+        run: |
+          wget https://dl.google.com/android/repository/android-ndk-r26d-linux.zip
+          unzip android-ndk-r26d-linux.zip
+          echo "ANDROID_NDK_HOME=$(pwd)/android-ndk-r26d" >> $GITHUB_ENV
+      - name: Download LZ4 source
+        run: |
+          wget https://github.com/lz4/lz4/archive/v1.10.0.tar.gz
+          tar -xzf v1.10.0.tar.gz
+          mv lz4-1.10.0 lz4
+      - name: Build LZ4 binary
+        run: |
+          export PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+          cd lz4
+          make CC=aarch64-linux-android34-clang CFLAGS="-static -O3 -DLZ4IO_MULTITHREAD=1" LDFLAGS="-static" -j$(nproc) lz4
+          $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip programs/lz4
+      - name: Upload LZ4 binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: lz4-recovery-binary
+          path: lz4/programs/lz4

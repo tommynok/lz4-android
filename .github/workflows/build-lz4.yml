@@ -5,25 +5,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-      - name: Install CMake
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y cmake=3.19.1*
       - name: Install Android NDK
         run: |
           wget https://dl.google.com/android/repository/android-ndk-r26d-linux.zip
           unzip android-ndk-r26d-linux.zip
           echo "ANDROID_NDK_HOME=$(pwd)/android-ndk-r26d" >> $GITHUB_ENV
-      - name: Build LZ4 with Gradle
+      - name: Download LZ4 source
         run: |
-          ./gradlew build -Pandroid.ndk.path=$ANDROID_NDK_HOME
+          wget https://github.com/lz4/lz4/archive/v1.10.0.tar.gz
+          tar -xzf v1.10.0.tar.gz
+          mv lz4-1.10.0 lz4
+      - name: Build LZ4 binary
+        run: |
+          export PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+          cd lz4
+          make CC=aarch64-linux-android34-clang CFLAGS="-static -O3" LDFLAGS="-static" -j$(nproc)
+          aarch64-linux-android-strip programs/lz4
       - name: Upload LZ4 binary
         uses: actions/upload-artifact@v4
         with:
           name: lz4-binary
-          path: library/build/outputs/native/*/lz4
+          path: lz4/programs/lz4
